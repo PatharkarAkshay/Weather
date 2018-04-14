@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Weather at your loction</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Akshay">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    
+    <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js" integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+" crossorigin="anonymous"></script>
+    <style>
+        body{
+            background-color: aqua;
+        }
+        .my-class{
+            background-color: yellowgreen;
+            color: olivedrab;
+            padding: 10px;
+            font-family: sans-serif;
+            transition-property: font-weight, background-color, width, font-size;  
+            transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1.4);
+            transition-duration: 0.7s;
+            transition-delay: 0s;
+        }
+        .my-class:hover{
+            background-color: beige;
+            font-weight: bold;
+            width: 100%;
+        }
+        
+    </style>
+</head>
+    <body>
+        <!--<h1 class="text-center content" id="city">Pune</h1>
+        <h3 class="text-center" id="date">Thursday April 12, 2018</h3>
+        <h3 class="text-center" id="temperature"><i id="thermometer-icon" class="fas fa-thermometer-three-quarters"></i> at location 18.52 lattitude and 73.86 longitude is 23 &#8451;</h3>-->
+        <h1 class="text-center"><i class="fas fa-thermometer-three-quarters"></i>Know Temperature at your location<i class="fas fa-map-marker"></i></h1>
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div id="content" class="my-class">
+                    
+                </div>
+            </div>
+        </div>
+        
+        
+        
+        <script>
+            function timeConverter(UNIX_timestamp){
+                var a = new Date(UNIX_timestamp * 1000);
+                var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                var weekdays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                var year = a.getFullYear();
+                var month = months[a.getMonth()];
+                var weekday = weekdays[a.getDay()];
+                var date = a.getDate();
+                var hour = a.getHours();
+                var min = a.getMinutes();
+                var sec = a.getSeconds();
+                var time = weekday + ' ' + month + ' ' + date + ', ' + year + ' ' + hour + ':' + min + ':' + sec ;
+                return time;
+            }
+            
+            window.onload = function() {
+                var startPos;
+                let loc, time, temperature, lon, lat;
+                let body = document.getElementById("content");
+                var geoOptions = {
+                    enableHighAccuracy: true
+                }
+
+                var geoSuccess = function(position) {
+                    startPos = position;
+                    let lat = startPos.coords.latitude;
+                    let lon = startPos.coords.longitude;
+                    let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=8891a6e4295102b8d1002a533994ee31`;
+                    fetch(url)
+                    .then(result => {
+                        return result.json();
+                    })
+                    .then(data => {
+                        loc = data.name
+                        time = timeConverter(data.dt);
+                        temperature = (data.main.temp - 273.15).toFixed(2);
+                        lon = data.coord.lon;
+                        lat = data.coord.lat;
+                        
+                        
+                        
+                        let h1 = document.createElement("h1");
+                        h1.setAttribute("class","text-center");
+                        let h1Content = document.createTextNode(loc);
+                        h1.appendChild(h1Content);       
+                                                
+                        let h2 = document.createElement("h2");
+                        h2.setAttribute("class","text-center");
+                        let h2Content = document.createTextNode(`Updated at ${time}`);
+                        h2.appendChild(h2Content);
+                        
+                        let h3 = document.createElement("h3");
+                        h3.setAttribute("class","text-center");
+                        let h3Content = document.createTextNode(`Tempature at your location ${lat} lattitude and ${lon} longitude is ${temperature}ºC`);
+                        h3.appendChild(h3Content);
+                        
+                        body.appendChild(h1);
+                        body.appendChild(h2);
+                        body.appendChild(h3);
+                        
+                        
+                    })
+                    .catch(error => console.log(error));
+                };
+                
+                var geoError = function(error) {
+                let errorString = 'Error occurred. Error code: ' + error.code + ' Error message:' +error.message;
+                console.log('Error occurred. Error code: ' + error.code + ' Error message:' +error.message);
+                    let h3 = document.createElement("h3");
+                    h3.setAttribute("class","text-center");
+                    let h3Content = document.createTextNode(errorString);
+                    h3.appendChild(h3Content);
+                    body.appendChild(h3);
+                };
+                navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geoOptions);
+                
+            };
+        </script>
+
+    </body>
+</html>
